@@ -4,9 +4,14 @@
 (provide (struct-out control-point)
          control-points->beziers)
 
-(require ffi/unsafe ffi/unsafe/define ffi/cvector data/queue)
+(require ffi/unsafe
+         ffi/unsafe/define
+         ffi/cvector
+         data/queue
+         racket/runtime-path)
 
-(define-ffi-definer define-libspiro (ffi-lib "libspiro"))
+(define-runtime-path libspiro-path '(so "libspiro"))
+(define-ffi-definer define-libspiro (ffi-lib libspiro-path))
 
 (define _spiro_cp_type
   (_enum `(spiro-corner = ,(char->integer #\v)
@@ -87,12 +92,12 @@
                  (λ (ctx knot) (void) #;(displayln "mark-knot"))))
   
   (define cpts
-    (list (control-point -500.0 0.0 'spiro-begin-segment)
-          (control-point -500.0 500.0 'spiro-g4)
-          (control-point 0.0 500.0 'spiro-left)
-          (control-point 500.0 0.0 'spiro-right)
-          (control-point 500.0 -500.0 'spiro-g4)
-          (control-point 0.0 -500.0 'spiro-end-segment)))
+    (list (control-point -500.0 0.0 'begin-segment)
+          (control-point -500.0 500.0 'g4)
+          (control-point 0.0 500.0 'enter-line)
+          (control-point 500.0 0.0 'exit-line)
+          (control-point 500.0 -500.0 'g4)
+          (control-point 0.0 -500.0 'end-segment)))
   
   (time (TaggedSpiroCPsToBezier  cpts diagnostic-bezctx))
   (time (control-points->beziers cpts)))
